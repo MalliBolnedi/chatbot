@@ -1,0 +1,36 @@
+import requests
+from hashlib import sha256
+from time import strftime, gmtime
+import hmac
+
+def amazon_product_search(keyword, aws_access_key, aws_secret_key, associate_tag):
+    endpoint = "webservices.amazon.com"
+    uri = "/onca/xml"
+    
+    params = {
+        "Service": "AWSECommerceService",
+        "Operation": "ItemSearch",
+        "AWSAccessKeyId": aws_access_key,
+        "AssociateTag": associate_tag,
+        "SearchIndex": "All",
+        "Keywords": keyword,
+        "ResponseGroup": "Images,ItemAttributes,Offers"
+    }
+    
+    # Signing the request
+    params['Timestamp'] = strftime('%Y-%m-%dT%H:%M:%SZ', gmtime())
+    param_str = '&'.join('%s=%s' % (k, params[k]) for k in sorted(params))
+    sign_str = 'GET\n%s\n%s\n%s' % (endpoint, uri, param_str)
+    signature = hmac.new(aws_secret_key.encode(), sign_str.encode(), sha256).digest().encode('base64').strip()
+    params['Signature'] = signature
+    
+    url = 'http://%s%s?%s' % (endpoint, uri, param_str)
+    
+    response = requests.get(url)
+    return response.content
+
+aws_access_key = "YOUR_AWS_ACCESS_KEY"
+aws_secret_key = "YOUR_AWS_SECRET_KEY"
+associate_tag = "YOUR_ASSOCIATE_TAG"
+keyword = "laptop"
+print(amazon_product_search(keyword, aws_access_key, aws_secret_key, associate_tag))
