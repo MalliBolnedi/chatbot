@@ -1,36 +1,26 @@
-import requests
-from hashlib import sha256
-from time import strftime, gmtime
-import hmac
+# Rule-Based Amazon Customer Service Chatbot Simulation in Google Colaboratory
 
-def amazon_product_search(keyword, aws_access_key, aws_secret_key, associate_tag):
-    endpoint = "webservices.amazon.com"
-    uri = "/onca/xml"
+def amazon_bot():
+    print("Amazon Bot: Welcome to Amazon Customer Service. How can I help you today? (Type 'bye' to exit.)")
     
-    params = {
-        "Service": "AWSECommerceService",
-        "Operation": "ItemSearch",
-        "AWSAccessKeyId": aws_access_key,
-        "AssociateTag": associate_tag,
-        "SearchIndex": "All",
-        "Keywords": keyword,
-        "ResponseGroup": "Images,ItemAttributes,Offers"
-    }
-    
-    # Signing the request
-    params['Timestamp'] = strftime('%Y-%m-%dT%H:%M:%SZ', gmtime())
-    param_str = '&'.join('%s=%s' % (k, params[k]) for k in sorted(params))
-    sign_str = 'GET\n%s\n%s\n%s' % (endpoint, uri, param_str)
-    signature = hmac.new(aws_secret_key.encode(), sign_str.encode(), sha256).digest().encode('base64').strip()
-    params['Signature'] = signature
-    
-    url = 'http://%s%s?%s' % (endpoint, uri, param_str)
-    
-    response = requests.get(url)
-    return response.content
+    while True:
+        user_input = input("You: ")
+        
+        if user_input.lower() == 'bye':
+            print("Amazon Bot: Thank you for reaching out. Have a great day!")
+            break
+        
+        # Sample rules for responses
+        elif 'order status' in user_input.lower():
+            print("Amazon Bot: Please provide your order number, so I can check the status for you.")
+        elif 'return' in user_input.lower():
+            print("Amazon Bot: I'm sorry to hear that you want to return an item. Can you provide more details about the order?")
+        elif 'refund' in user_input.lower():
+            print("Amazon Bot: Let's check your refund status. Please share your order number.")
+        elif 'prime membership' in user_input.lower():
+            print("Amazon Bot: Are you looking to subscribe, cancel, or get information about Amazon Prime membership?")
+        else:
+            print("Amazon Bot: I'm sorry, I couldn't understand your query. Could you please rephrase or provide more details?")
 
-aws_access_key = "YOUR_AWS_ACCESS_KEY"
-aws_secret_key = "YOUR_AWS_SECRET_KEY"
-associate_tag = "YOUR_ASSOCIATE_TAG"
-keyword = "laptop"
-print(amazon_product_search(keyword, aws_access_key, aws_secret_key, associate_tag))
+# Run the chatbot
+amazon_bot()
